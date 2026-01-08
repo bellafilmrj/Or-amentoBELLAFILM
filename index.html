@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orçamento Bella Film RJ</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#0b4f7c;
+    margin:0;
+    padding:20px;
+}
+
+.app{
+    max-width:480px;
+    margin:auto;
+}
+
+.card{
+    background:#fff;
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:12px;
+}
+
+h1{
+    text-align:center;
+    color:#fff;
+    font-size:20px;
+}
+
+input, select{
+    width:100%;
+    padding:8px;
+    margin:6px 0 10px;
+    font-size:15px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#0b4f7c;
+    color:#fff;
+    padding:6px;
+}
+
+td{
+    border:1px solid #ccc;
+    padding:4px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:6px;
+    font-size:15px;
+    margin-top:6px;
+    cursor:pointer;
+}
+
+.add{background:#e0e0e0;}
+.copy{background:#0b4f7c;color:#fff;}
+.image{background:#0a7a3b;color:#fff;}
+.clear{background:#b30000;color:#fff;}
+
+pre{
+    white-space:pre-line;
+    font-family:inherit;
+    font-size:14px;
+}
+
+/* ===== IMAGEM ===== */
+#imagemOrcamento{
+    width:1080px;
+    height:1080px;
+    background:#0b4f7c;
+    display:none;
+    align-items:center;
+    justify-content:center;
+}
+
+#imagemOrcamento .box{
+    width:90%;
+    background:#fff;
+    border-radius:24px;
+    padding:50px;
+    text-align:center;
+}
+
+#imagemOrcamento h2{
+    font-size:42px;
+    margin-bottom:10px;
+}
+
+#imagemOrcamento h3{
+    font-size:30px;
+    margin-bottom:20px;
+}
+
+#imgMedidas{
+    font-size:24px;
+    line-height:1.4;
+}
+
+.valorBox{
+    background:#0b4f7c;
+    color:#fff;
+    padding:20px;
+    border-radius:16px;
+    margin:25px 0;
+    font-size:30px;
+}
+
+#imgPelicula{
+    font-size:26px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+<h1>ORÇAMENTO – BELLA FILM RJ</h1>
+
+<div class="card">
+<select id="pelicula" onchange="calcular()">
+<option value="14">Fumê</option>
+<option value="35">Fumê Carbono</option>
+<option value="35">Espelhado</option>
+<option value="35">Jateado</option>
+<option value="140">Blackout</option>
+<option value="35">Branco Leitoso</option>
+<option value="70">Ceramic Fumê</option>
+<option value="140">Ceramic Incolor</option>
+<option value="80">Ceramic Espelhada</option>
+<option value="37">Listrado</option>
+<option value="37">Película de Segurança</option>
+<option value="50">Remoção</option>
+</select>
+
+<input type="number" id="valorVenda" value="100" oninput="calcular()">
+</div>
+
+<div class="card">
+<table id="tabela">
+<thead>
+<tr><th>Altura</th><th>Largura</th><th>Qtd</th></tr>
+</thead>
+<tbody>
+<tr>
+<td><input type="number" step="0.01" oninput="calcular()"></td>
+<td><input type="number" step="0.01" oninput="calcular()"></td>
+<td><input type="number" value="1" oninput="calcular()"></td>
+</tr>
+</tbody>
+</table>
+<button class="add" onclick="addLinha()">➕ Adicionar Medida</button>
+</div>
+
+<div class="card"><pre id="resumoCliente"></pre></div>
+<div class="card"><pre id="resumoEmpresa"></pre></div>
+
+<div class="card">
+<button class="copy" onclick="copiar(resumoCliente)">📋 COPIAR CLIENTE</button>
+<button class="copy" onclick="copiar(resumoEmpresa)">📋 COPIAR EMPRESA</button>
+<button class="image" onclick="gerarImagem()">🖼️ GERAR IMAGEM</button>
+<button class="clear" onclick="location.reload()">🧹 LIMPAR</button>
+</div>
+</div>
+
+<div id="imagemOrcamento">
+  <div class="box">
+    <h2>Bella Film RJ</h2>
+    <h3>ORÇAMENTO</h3>
+    <pre id="imgMedidas"></pre>
+    <div class="valorBox" id="imgValores"></div>
+    <div id="imgPelicula"></div>
+  </div>
+</div>
+
+<script>
+function addLinha(){
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+    <td><input type="number" step="0.01" oninput="calcular()"></td>
+    <td><input type="number" step="0.01" oninput="calcular()"></td>
+    <td><input type="number" value="1" oninput="calcular()"></td>`;
+    document.querySelector("#tabela tbody").appendChild(tr);
+}
+
+function calcular(){
+    let medidas="", total=0;
+    document.querySelectorAll("#tabela tbody tr").forEach(tr=>{
+        let h=+tr.children[0].children[0].value||0;
+        let l=+tr.children[1].children[0].value||0;
+        let q=+tr.children[2].children[0].value||0;
+        if(h&&l&&q){
+            medidas+=`${h.toFixed(2)} x ${l.toFixed(2)} x ${q}\n`;
+            total+=h*l*q;
+        }
+    });
+
+    let venda=+valorVenda.value;
+    let pix=total*venda;
+    let cartao=pix*1.10;
+
+    let custoM2=+pelicula.value;
+    let qtd=Math.ceil(total);
+    let custo=qtd*custoM2;
+    let lucro=pix-custo;
+
+    const nomePelicula = pelicula.options[pelicula.selectedIndex].text;
+
+    resumoCliente.innerText=
+`📐 Medidas:
+${medidas}
+🎞️ Película: ${nomePelicula}
+
+💰 PIX: R$ ${pix.toFixed(2)}
+💳 Cartão (até 10x sem juros): R$ ${cartao.toFixed(2)}
+10x de R$ ${(cartao/10).toFixed(2)}`;
+
+    resumoEmpresa.innerText=
+`📐 Medidas:
+${medidas}
+🎞️ Película: ${nomePelicula}
+
+METRAGEM TOTAL: ${total.toFixed(2)}
+CUSTO POR M²: R$ ${venda.toFixed(2)}
+
+💰 PIX: R$ ${pix.toFixed(2)}
+💳 Cartão (até 10x): R$ ${cartao.toFixed(2)}
+
+QTD MATERIAL: ${qtd}
+CUSTO: R$ ${custo.toFixed(2)} (${custoM2.toFixed(2)} x ${qtd} m²)
+LUCRO: R$ ${lucro.toFixed(2)}`;
+}
+
+function copiar(el){
+    navigator.clipboard.writeText(el.innerText);
+    alert("Texto copiado!");
+}
+
+function gerarImagem(){
+    imagemOrcamento.style.display="flex";
+    imgMedidas.innerText=resumoCliente.innerText.split("🎞️")[0];
+    imgValores.innerText=resumoCliente.innerText.match(/PIX:[\s\S]*/)[0];
+    imgPelicula.innerText=pelicula.options[pelicula.selectedIndex].text;
+
+    html2canvas(imagemOrcamento,{scale:2}).then(c=>{
+        let a=document.createElement("a");
+        a.download="orcamento.png";
+        a.href=c.toDataURL();
+        a.click();
+        imagemOrcamento.style.display="none";
+    });
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</body>
+</html>
